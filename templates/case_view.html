@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Forensics — Case Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
+</head>
+
+<body>
+
+    <nav class="navbar navbar-dark nav-forensic">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <div class="brand-icon"><i class="fas fa-shield-halved"></i></div>
+                <span class="brand-title">AI FORENSICS</span>
+            </a>
+            <div class="ms-auto d-flex gap-2">
+                <a href="/" class="btn btn-sm btn-outline-forensic"><i class="fas fa-home me-1"></i>Home</a>
+                <a href="/upload" class="btn btn-sm btn-forensic-primary"><i class="fas fa-plus me-1"></i>New Case</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+
+        <!-- Header -->
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="case-badge-large"><i class="fas fa-folder-open"></i></div>
+            <div>
+                <h2 class="section-title mb-1">Case Management</h2>
+                <p class="text-muted mb-0">All forensic cases stored in the evidence database</p>
+            </div>
+            <div class="ms-auto">
+                <span class="badge-count">{{ cases|length }} Cases</span>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'success' if category=='success' else 'danger' }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% if cases %}
+
+        <!-- Search / Filter -->
+        <div class="mb-4">
+            <div class="search-bar-wrap">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="caseSearch" class="form-control search-input"
+                    placeholder="Search by Case ID or name..." />
+            </div>
+        </div>
+
+        <!-- Cases Table -->
+        <div class="table-responsive">
+            <table class="table table-forensic" id="casesTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Case ID</th>
+                        <th>Date/Time</th>
+                        <th>Weapon</th>
+                        <th>Blood</th>
+                        <th>Footprint</th>
+                        <th>Face</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="casesTbody">
+                    {% for case in cases %}
+                    <tr class="case-row">
+                        <td class="text-muted">{{ loop.index }}</td>
+                        <td class="case-id-cell">
+                            <a href="/dashboard/{{ case.case_id }}" class="case-id-link">
+                                {{ case.case_id }}
+                            </a>
+                        </td>
+                        <td class="text-muted small">{{ case.date[:16] if case.date else '—' }}</td>
+
+                        <!-- Weapon -->
+                        <td>
+                            {% if case.weapon_detected == 'Yes' %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-gun me-1"></i>FOUND
+                            </span>
+                            {% elif case.weapon_detected == 'Not Run' %}
+                            <span class="badge bg-dark text-muted">Not Run</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Clear</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Blood -->
+                        <td>
+                            {% if case.blood_detected == 'Yes' %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-droplet me-1"></i>{{ case.blood_pattern[:12] if case.blood_pattern else
+                                'Found' }}
+                            </span>
+                            {% elif case.blood_detected == 'Not Run' %}
+                            <span class="badge bg-dark text-muted">Not Run</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Clear</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Footprint -->
+                        <td>
+                            {% if case.footprint_match == 'Yes' %}
+                            <span class="badge bg-info text-dark">
+                                <i class="fas fa-shoe-prints me-1"></i>{{ case.footprint_score|round(1) }}%
+                            </span>
+                            {% elif case.footprint_match == 'Not Run' %}
+                            <span class="badge bg-dark text-muted">Not Run</span>
+                            {% else %}
+                            <span class="badge bg-secondary">No Match</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Face -->
+                        <td>
+                            {% if case.face_match == 'Yes' %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-user me-1"></i>{{ case.face_name[:12] if case.face_name else 'ID\'d' }}
+                            </span>
+                            {% elif case.face_match == 'Not Run' %}
+                            <span class="badge bg-dark text-muted">Not Run</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Unknown</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Actions -->
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="/dashboard/{{ case.case_id }}" class="btn btn-xs btn-outline-forensic"
+                                    title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <form action="/case/{{ case.case_id }}/delete" method="POST" class="d-inline"
+                                    onsubmit="return confirm('Delete case {{ case.case_id }}?')">
+                                    <button type="submit" class="btn btn-xs btn-outline-danger" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state text-center py-5">
+            <div class="empty-icon mb-4"><i class="fas fa-folder-open"></i></div>
+            <h4>No Cases Found</h4>
+            <p class="text-muted">Start by uploading an evidence image or capturing with the webcam.</p>
+            <div class="d-flex gap-3 justify-content-center mt-4">
+                <a href="/upload" class="btn btn-forensic-primary"><i class="fas fa-upload me-2"></i>Upload Evidence</a>
+                <form action="/capture" method="POST">
+                    <button type="submit" class="btn btn-forensic-secondary"><i
+                            class="fas fa-camera me-2"></i>Capture</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Live search filter
+        const searchInput = document.getElementById('caseSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const query = this.value.toLowerCase();
+                document.querySelectorAll('.case-row').forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(query) ? '' : 'none';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

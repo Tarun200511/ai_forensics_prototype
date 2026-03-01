@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Edge Forensics — Home</title>
+  <meta name="description" content="AI-powered forensic analysis system for crime scene intelligence. Detect weapons, blood patterns, footprints, and faces."/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ===== Navigation ===== -->
+<nav class="navbar navbar-expand-lg navbar-dark nav-forensic">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+      <div class="brand-icon"><i class="fas fa-shield-halved"></i></div>
+      <div>
+        <span class="brand-title">AI FORENSICS</span>
+        <span class="brand-sub d-block">Edge Intelligence System</span>
+      </div>
+    </a>
+    <div class="ms-auto d-flex align-items-center gap-3">
+      <span class="status-indicator"><span class="pulse-dot"></span> SYSTEM ACTIVE</span>
+      <a href="/cases" class="btn btn-outline-forensic btn-sm">
+        <i class="fas fa-folder-open me-1"></i> Cases
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== Hero Section ===== -->
+<div class="hero-section">
+  <div class="hero-grid-overlay"></div>
+  <div class="container py-5">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <div class="hero-badge mb-3">
+          <i class="fas fa-microchip me-2"></i> AI-POWERED PROTOTYPE
+        </div>
+        <h1 class="hero-title">Crime Scene<br/><span class="text-accent">Intelligence</span></h1>
+        <p class="hero-subtitle">
+          On-site forensic analysis using Computer Vision & Deep Learning.
+          Capture, analyze, and document crime scene evidence in real-time.
+        </p>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'success' if category=='success' else 'danger' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Action Buttons -->
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <a href="/upload" class="btn btn-forensic-primary btn-lg">
+            <i class="fas fa-upload me-2"></i> Upload Evidence
+          </a>
+          <button class="btn btn-forensic-secondary btn-lg" onclick="captureWebcam()">
+            <i class="fas fa-camera me-2"></i> Webcam Capture
+          </button>
+          <a href="/cases" class="btn btn-outline-forensic btn-lg">
+            <i class="fas fa-database me-2"></i> View Cases
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-5 mt-5 mt-lg-0">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon weapon"><i class="fas fa-gun"></i></div>
+            <div class="stat-value text-danger">{{ stats.weapons_found }}</div>
+            <div class="stat-label">Weapons Found</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blood"><i class="fas fa-droplet"></i></div>
+            <div class="stat-value text-warning">{{ stats.blood_found }}</div>
+            <div class="stat-label">Blood Detected</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon face"><i class="fas fa-user-secret"></i></div>
+            <div class="stat-value text-success">{{ stats.faces_matched }}</div>
+            <div class="stat-label">Faces Matched</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon cases"><i class="fas fa-folder"></i></div>
+            <div class="stat-value text-info">{{ stats.total_cases }}</div>
+            <div class="stat-label">Total Cases</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Module Cards ===== -->
+<div class="container py-5">
+  <h2 class="section-title text-center mb-2">Analysis Modules</h2>
+  <p class="section-sub text-center mb-5">Four AI-powered forensic analysis engines</p>
+
+  <div class="row g-4">
+
+    <!-- Weapon Detection -->
+    <div class="col-md-6 col-lg-3">
+      <div class="module-card module-weapon">
+        <div class="module-icon"><i class="fas fa-crosshairs"></i></div>
+        <h4>Weapon Detection</h4>
+        <p>YOLOv8 deep learning detects knives, firearms, and blunt objects with bounding boxes.</p>
+        <div class="module-tech">
+          <span class="tech-badge">YOLOv8</span>
+          <span class="tech-badge">OpenCV</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blood Analysis -->
+    <div class="col-md-6 col-lg-3">
+      <div class="module-card module-blood">
+        <div class="module-icon"><i class="fas fa-droplet"></i></div>
+        <h4>Blood Pattern</h4>
+        <p>HSV color masking identifies blood regions and classifies stain patterns: Impact, Cast-off, Drip.</p>
+        <div class="module-tech">
+          <span class="tech-badge">HSV Analysis</span>
+          <span class="tech-badge">Contours</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footprint -->
+    <div class="col-md-6 col-lg-3">
+      <div class="module-card module-footprint">
+        <div class="module-icon"><i class="fas fa-shoe-prints"></i></div>
+        <h4>Footprint Match</h4>
+        <p>ORB keypoint descriptors compare crime scene footprints against a reference database.</p>
+        <div class="module-tech">
+          <span class="tech-badge">ORB Features</span>
+          <span class="tech-badge">BFMatcher</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Face Recognition -->
+    <div class="col-md-6 col-lg-3">
+      <div class="module-card module-face">
+        <div class="module-icon"><i class="fas fa-face-viewfinder"></i></div>
+        <h4>Face Recognition</h4>
+        <p>128-dimensional face encoding matches detected faces against the suspect database.</p>
+        <div class="module-tech">
+          <span class="tech-badge">face_recognition</span>
+          <span class="tech-badge">dlib</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== Recent Cases ===== -->
+{% if recent_cases %}
+<div class="container pb-5">
+  <h2 class="section-title mb-4">Recent Cases</h2>
+  <div class="table-responsive">
+    <table class="table table-forensic">
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Date</th>
+          <th>Weapon</th>
+          <th>Blood</th>
+          <th>Face</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for case in recent_cases %}
+        <tr>
+          <td class="case-id-cell">{{ case.case_id }}</td>
+          <td>{{ case.date[:16] if case.date else '—' }}</td>
+          <td>
+            {% if case.weapon_detected == 'Yes' %}
+              <span class="badge bg-danger"><i class="fas fa-gun me-1"></i>Detected</span>
+            {% else %}
+              <span class="badge bg-secondary">None</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if case.blood_detected == 'Yes' %}
+              <span class="badge bg-warning text-dark"><i class="fas fa-droplet me-1"></i>Found</span>
+            {% else %}
+              <span class="badge bg-secondary">None</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if case.face_match == 'Yes' %}
+              <span class="badge bg-success"><i class="fas fa-user me-1"></i>{{ case.face_name or 'Matched' }}</span>
+            {% else %}
+              <span class="badge bg-secondary">None</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="/dashboard/{{ case.case_id }}" class="btn btn-sm btn-outline-forensic">
+              <i class="fas fa-eye me-1"></i> View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="text-center mt-3">
+    <a href="/cases" class="btn btn-outline-forensic">View All Cases <i class="fas fa-arrow-right ms-1"></i></a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ===== Footer ===== -->
+<footer class="footer-forensic">
+  <div class="container text-center">
+    <div class="footer-logo mb-2"><i class="fas fa-shield-halved me-2"></i>AI Edge Forensics Prototype</div>
+    <p class="footer-sub">Final Year Engineering Project — Laptop-Based On-Site Crime Scene Intelligence</p>
+  </div>
+</footer>
+
+<!-- Webcam Capture Form (hidden) -->
+<form id="captureForm" action="/capture" method="POST" style="display:none;"></form>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function captureWebcam() {
+  if (confirm('Capture a frame from your webcam?')) {
+    document.getElementById('captureForm').submit();
+  }
+}
+</script>
+</body>
+</html>

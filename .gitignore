@@ -1,0 +1,30 @@
+# Virtual Environments
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Database and Pickles
+*.db
+*.sqlite3
+*.pkl
+models/*.pt
+
+# User Uploads and Evidence
+static/uploads/*
+!static/uploads/.gitkeep
+cases/*/
+!cases/.gitkeep
+suspects/*
+!suspects/.gitkeep
+static/footprints/*
+!static/footprints/.gitkeep
+
+# IDEs and OS files
+.vscode/
+.idea/
+.DS_Store
+*.log
+test_results_py.log
+test_results.txt
